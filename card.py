@@ -12,10 +12,10 @@ class UnoCard:
 
     def __get_color(self):
         # if change color / plus 4 => no color available
-        return self.colors[self.color] if self.color else "no color available"
+        return self.colors[self.color]
 
     def __get_number(self):
-        return self.number if self.number else "no number available"
+        return self.number
 
     def __get_type(self):
         return self.type
@@ -23,4 +23,17 @@ class UnoCard:
     def __is_functional(self):
         return self.type in {"plus2", "plus4", "stop", "change color"}
 
+    def get_num_plus(self):
+        if self.type.startswith('plus'):
+            return int(self.type.replace('plus'))
+
+    def __str__(self):
+        s = ''
+        if self.color is not None:
+            s += f'{self.__get_color()}'
+        if self.number is not None:
+            s += f' {self.__get_number()}'
+        if self.type is not None:
+            s += f' {self.__get_type()}'
+        return s
 
