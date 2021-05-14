@@ -42,7 +42,7 @@ class UnoGame:
                     card = UnoCard(color=None, number=None, type=function)
                     deck.append(card)
 
-        return deck
+        return shuffle(deck)
 
 
     def get_deck_str(self):
