@@ -23,9 +23,10 @@ class UnoCard:
     def __is_functional(self):
         return self.type in {"plus2", "plus4", "stop", "change color"}
 
-    def get_num_plus(self):
+    def is_plus(self):
         if self.type.startswith('plus'):
             return int(self.type.replace('plus'))
+        return 0
 
     def __str__(self):
         s = ''
