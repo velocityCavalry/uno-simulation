@@ -9,6 +9,7 @@ class UnoGame:
 
         # initialize card decks
         self.deck = self.__create_deck(time_number_cards, time_num_function)
+        self.num_cards = len(self.deck)
 
 
 
@@ -34,11 +35,13 @@ class UnoGame:
                 deck.append(card)
 
         # create other functional cards:
-        for _ in time_num_function
+        for _ in time_num_function:
             for function in functions[1:]:
                 for _ in range(4):
                     card = UnoCard(color=None, number=None, type=function)
                     deck.append(card)
+
+        return deck
 
 
 
