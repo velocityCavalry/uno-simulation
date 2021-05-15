@@ -31,10 +31,10 @@ class UnoCard:
     def __str__(self):
         s = ''
         if self.color is not None:
-            s += f'{self.__get_color()}'
+            s += f'{self.get_color()}'
         if self.number is not None:
-            s += f' {self.__get_number()}'
+            s += f' {self.get_number()}'
         if self.type is not None:
-            s += f' {self.__get_type()}'
+            s += f' {self.get_type()}'
         return s
 
