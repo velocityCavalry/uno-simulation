@@ -7,14 +7,16 @@ class Gameover(Exception):
         print("Winner: player", pid)
 
 def draw_cards_check(game, player, player_card):
-    if game.last_card is None or (player_card is None and game.last_card.get_type() != 'stop'):
-        cards_to_draw = []
-        if game.plus > 0:
-            cards_to_draw = game.pop_cards(game.plus)
-            game.plus = 0
-        else:
-            cards_to_draw = game.pop_cards(1)
-        player.draw(cards_to_draw)
+    if player_card is None:
+        if game.last_card is None or game.last_card.get_type() != 'stop':
+            cards_to_draw = []
+            if game.plus > 0:
+                cards_to_draw = game.pop_cards(game.plus)
+                game.plus = 0
+            else:
+                cards_to_draw = game.pop_cards(1)
+            player.draw(cards_to_draw)
+
 
 def check_win(player):
     if len(player.cards) == 0:

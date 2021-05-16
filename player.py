@@ -44,13 +44,14 @@ class Player:
             else:
                 eligible_cards = set()
                 for card in self.cards:
-                    if last_color == card.get_color():
+                    if card.get_type == 'plus4' or card.get_type == 'change color':
                         eligible_cards.add(card)
-                    elif card.is_functional():
+                    elif card.get_color() == last_color:
                         eligible_cards.add(card)
+
                 eligible_cards = list(eligible_cards)
                 print("m1")
-                print(eligible_cards)
+                print(str([str(x) for x in eligible_cards]))
 
                 if len(eligible_cards) == 0:
                     return None
@@ -79,22 +80,26 @@ class Player:
                 elif last_card.get_color() == card.get_color() or last_card.get_number() == card.get_number():
                     eligible_cards.add(card)
             else:
-                if card.get_type() == 'plus2' and last_card.get_color() == card.get_color():
+                if card.get_type() == 'plus4':
                     eligible_cards.add(card)
-                elif card.get_type() == 'plus4' or card.get_type() == 'change color':
-                    eligible_cards.add(card)
-            eligible_cards = list(eligible_cards)
-            print("m2")
-            print(eligible_cards)
+                if last_card.get_type() == 'plus2':
+                    if card.get_type() == 'plus2':
+                        eligible_cards.add(card)
+                if last_card.get_type() == 'change color':
+                    if card.get_type() == 'change color':
+                        eligible_cards.add(card)
+        eligible_cards = list(eligible_cards)
+        print("m2")
+        print(str([str(x) for x in eligible_cards]))
 
-            if len(eligible_cards) == 0:
-                    return None
+        if len(eligible_cards) == 0:
+                return None
 
-            card_to_pop = eligible_cards[randint(0, len(eligible_cards) - 1)]
-            self.cards.remove(card_to_pop)
+        card_to_pop = eligible_cards[randint(0, len(eligible_cards) - 1)]
+        self.cards.remove(card_to_pop)
 
-            card_to_pop = self.check_color(card_to_pop)
-            return card_to_pop
+        card_to_pop = self.check_color(card_to_pop)
+        return card_to_pop
                 
             
             
