@@ -12,7 +12,10 @@ class UnoCard:
 
     def get_color(self):
         # if change color / plus 4 => no color available
-        return self.colors[self.color]
+        if self.color in range(0, 4):
+            return self.colors[self.color]
+        else:
+            return None
 
     def get_number(self):
         return self.number
@@ -35,6 +38,11 @@ class UnoCard:
         if self.number is not None:
             s += f' {self.get_number()}'
         if self.type is not None:
-            s += f' {self.get_type()}'
+            if self.type == 'plus2' or self.type == 'stop':
+                s += f' {self.get_type()}'
+            elif self.type == 'plus4' or self.type == 'change color':
+                s += f'{self.get_type()}'
         return s
 
+    def set_color(self):
+        assert self.type == 'change color' or self.type == 'plus4'

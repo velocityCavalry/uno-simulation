@@ -10,8 +10,9 @@ class UnoGame:
         # initialize card decks
         self.deck = self.__create_deck(time_number_cards, time_num_function)
         self.num_cards = len(self.deck)
-
-
+        self.last_card = None
+        self.last_color = None
+        self.plus = 0
 
     def __create_deck(self, time_number_cards, time_num_function):
 
@@ -45,6 +46,25 @@ class UnoGame:
         shuffle(deck)
         return deck
 
+    def pop_cards(self, n):
+        cards_to_pop = []
+        assert n < len(self.deck)
+        
+        for i in range(0, n):
+            card_to_pop = self.deck.pop()
+            cards_to_pop.append(card_to_pop)
+        return cards_to_pop
+
+    def update(self, pid, card):
+        self.last_card = card
+        if card is not None:
+            if card.is_functional():
+                t = card.get_type()
+                if t == 'plus2':
+                    self.plus += 2
+                if t == 'plus4':
+                    self.plus += 4
+            self.last_color = card.get_color()
 
     def get_deck_str(self):
         return str([str(x) for x in self.deck])
