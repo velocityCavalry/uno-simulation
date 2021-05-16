@@ -1,21 +1,34 @@
+import dataclasses
+from typing import Optional
+import enum
+
+
+class Color(enum.Enum):
+    RED = "red"
+    YELLOW = "yellow"
+    BLUE = "blue"
+    GREEN = "green"
+    EMPTY = "empty"
+
+    def __str__(self):
+        return self.value
+
+    def __lt__(self, other):
+        if self.__class__ is other.__class__:
+            return self.value < other.value
+        return NotImplemented
+
+
+
+
+@dataclasses.dataclass(eq=True, order=True, frozen=True)
 class UnoCard:
-    def __init__(self, color, number, type):
-        """
-        :param color: string
-        :param number: int
-        :param type: string
-        """
-        self.colors = ['red', 'yellow', 'blue', 'green']
-        self.color = color
-        self.number = number
-        self.type = type  # type=None if number?
+    color: Color
+    number: int
+    type: Optional[str]
 
     def get_color(self):
-        # if change color / plus 4 => no color available
-        if self.color in range(0, 4):
-            return self.colors[self.color]
-        else:
-            return None
+        return self.color
 
     def get_number(self):
         return self.number
@@ -26,7 +39,7 @@ class UnoCard:
     def is_functional(self):
         return self.type in {"plus2", "plus4", "stop", "change color"}
 
-    def is_plus(self):
+    def get_plus_number(self):
         if self.type.startswith('plus'):
             return int(self.type.replace('plus'))
         return 0
