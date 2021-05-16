@@ -1,5 +1,5 @@
 from random import choice, shuffle
-from card import UnoCard
+from card import UnoCard, Color
 
 
 class UnoGame:
@@ -9,6 +9,7 @@ class UnoGame:
 
         # initialize card decks
         self.deck = self.__create_deck(time_number_cards, time_num_function)
+        self.players = players
         self.num_cards = len(self.deck)
         self.last_card = None
         self.last_color = None
@@ -16,9 +17,8 @@ class UnoGame:
 
     def __create_deck(self, time_number_cards, time_num_function):
 
-        colors = list(range(4))  # 0, 1, 2, 3
+        colors = [Color.RED, Color.GREEN, Color.BLUE, Color.YELLOW]  # 0, 1, 2, 3
         numbers = list(range(1, 10)) # 1, 2, 3..., 9
-        functions = ["plus4", "change color"]
 
         deck = []
 
@@ -55,16 +55,19 @@ class UnoGame:
             cards_to_pop.append(card_to_pop)
         return cards_to_pop
 
-    def update(self, pid, card):
-        self.last_card = card
+    def update(self, card, color_tbc=None):
         if card is not None:
+            self.last_card = card
             if card.is_functional():
                 t = card.get_type()
                 if t == 'plus2':
                     self.plus += 2
                 if t == 'plus4':
                     self.plus += 4
-            self.last_color = card.get_color()
+            if color_tbc:
+                self.last_color = color_tbc
+            else:
+                self.last_color = card.get_color()
 
     def get_deck_str(self):
         return str([str(x) for x in self.deck])
