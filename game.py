@@ -32,7 +32,7 @@ class UnoGame:
         # create plus2 and stop cards:
         for _ in range(time_number_cards):
             for color in colors:
-                for function in ['plus 2', 'stop']:
+                for function in ['plus2', 'stop']:
                     card = UnoCard(color=color, number=None, type=function)
                     deck.append(card)
 
