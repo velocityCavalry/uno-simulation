@@ -44,7 +44,7 @@ class Player:
             else:
                 eligible_cards = set()
                 for card in self.cards:
-                    if card.get_type == 'plus4' or card.get_type == 'change color':
+                    if card.get_type() == 'plus4' or card.get_type() == 'change color':
                         eligible_cards.add(card)
                     elif card.get_color() == last_color:
                         eligible_cards.add(card)
