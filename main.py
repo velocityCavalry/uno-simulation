@@ -3,41 +3,35 @@ from player import Player
 from card import UnoCard
 from card import Color, UnoCard
 
-
-class Gameover(Exception):
-    def __init__(self, pid):
-        print("Winner: player", pid)
+DEBUG = False
 
 def draw_cards_check(game, player, player_card):
     if player_card is None:
         if game.last_card is None or game.last_card.get_type() != 'stop':
             if game.plus > 0:
-                cards_to_draw = game.pop_cards(game.plus)
+                try:
+                    cards_to_draw = game.pop_cards(game.plus)
+                except AssertionError:
+                    return False
                 game.plus = 0
             else:
-                cards_to_draw = game.pop_cards(1)
+                try:
+                    cards_to_draw = game.pop_cards(1)
+                except AssertionError:
+                    return False
             player.draw(cards_to_draw)
+    return True
 
-
-def check_win(player):
-    if len(player.cards) == 0:
-        raise Gameover(player.pid)
-    pass
-
-if __name__ == '__main__':
+def simulate(p1pid, p1strategy, p2pid, p2strategy):
     # simulate one game
     game = UnoGame()
     # draw 5 cards
-    p1 = Player(pid=1, cards=game.pop_cards(5))
-    p2 = Player(pid=2, cards=game.pop_cards(5))
-    p1.hands()
-    p2.hands()
+    p1 = Player(pid=p1pid, cards=game.pop_cards(5), strategy=p1strategy)
+    p2 = Player(pid=p2pid, cards=game.pop_cards(5), strategy=p2strategy)
 
-    cnt = 0
-    for round in range(0, 10):
-        print('round', cnt)
+    cnt = 1
+    while True:
         player1_card = p1.play(last_card=game.last_card, opponent_num=len(p2.cards), last_color=game.last_color)
-        print('\tPlayer ' + str(p1.pid) + ' played ' + str(player1_card))
 
         is_plus_4_or_change = player1_card is not None and (player1_card.get_type() == 'plus4' or player1_card.get_type() == 'change color')
         if p1.strategy and is_plus_4_or_change:
@@ -46,14 +40,17 @@ if __name__ == '__main__':
             color_tbc = Color.RED
         else:
             color_tbc = None
+        
+        if not draw_cards_check(game, p1, player1_card):
+            # print("Running out of all cards so the game ends in {} round".format(cnt))
+            return [p1.pid, cnt, len(game.deck)]
 
-        draw_cards_check(game, p1, player1_card)
         game.update(player1_card, color_tbc)
-        check_win(p1)
-        p1.hands()
+        if len(p1.cards) == 0:
+            # print("Player {} wins the game in {} round".format(p1.pid, cnt))
+            return [p1.pid, cnt, len(game.deck)]
 
         player2_card = p2.play(last_card=game.last_card, opponent_num=len(p1.cards), last_color=game.last_color)
-        print('\tPlayer ' + str(p2.pid) + ' played ' + str(player2_card))
 
         is_plus_4_or_change = player2_card is not None and (player2_card.get_type() == 'plus4' or player2_card.get_type() == 'change color')
         if p2.strategy and is_plus_4_or_change:
@@ -63,10 +60,43 @@ if __name__ == '__main__':
         else:
             color_tbc = None
 
-        draw_cards_check(game, p2, player2_card)
+        if not draw_cards_check(game, p2, player2_card):
+            # print("Running out of all cards so the game ends in {} round".format(cnt))
+            return [p2.pid, cnt, len(game.deck)]
+        
         game.update(player2_card, color_tbc)
-        check_win(p2)
-        p2.hands()
+        if len(p2.cards) == 0:
+            # print("Player {} wins the game in {} round".format(p1.pid, cnt))
+            return [p2.pid, cnt, len(game.deck)]
 
         cnt += 1
+
+        if DEBUG:
+            print('-------------------ROUND {}-------------------'.format(cnt))
+            p1.hands()
+            print('\tPlayer ' + str(p1.pid) + ' played ' + str(player1_card))
+            p2.hands()
+            print('\tPlayer ' + str(p2.pid) + ' played ' + str(player2_card))
+
+if __name__ == '__main__':
+    p1pid = 1
+    p2pid = 2
+
+    avg_round = 0
+    p1win = 0
+    p2win = 0
+    run_out_cards = 0
     
+    for i in range(0, 1000):
+        winner, r, num_cards_left = simulate(p1pid, True, p2pid, False)
+        avg_round += r
+        if winner == p1pid:
+            p1win += 1
+        elif winner == p2pid:
+            p2win += 1
+            
+    
+    avg_round = avg_round / 1000
+    print(avg_round)
+
+        

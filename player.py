@@ -1,6 +1,8 @@
 from card import UnoCard
 from random import randint, choice
 
+DEBUG = False
+
 class Player:
     def __init__(self, pid, cards, strategy=False):
         self.pid = pid
@@ -48,8 +50,8 @@ class Player:
                         eligible_cards.append(card)
                     elif card.get_color() == last_color:
                         eligible_cards.append(card)
-
-                print(f'{self.pid} eligible cards:  {str([str(x) for x in eligible_cards])}')
+                if DEBUG:
+                    print(f'{self.pid} eligible cards:  {str([str(x) for x in eligible_cards])}')
 
                 if len(eligible_cards) == 0:
                     return None
@@ -85,8 +87,8 @@ class Player:
                 if last_card.get_type() == 'change color':
                     if card.get_type() == 'change color':
                         eligible_cards.append(card)
-
-        print(f'{self.pid} eligible cards:  {str([str(x) for x in eligible_cards])}')
+        if DEBUG:
+            print(f'{self.pid} eligible cards:  {str([str(x) for x in eligible_cards])}')
 
         if len(eligible_cards) == 0:
                 return None

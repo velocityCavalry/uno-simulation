@@ -56,8 +56,9 @@ class UnoGame:
         return cards_to_pop
 
     def update(self, card, color_tbc=None):
+        self.last_card = card
         if card is not None:
-            self.last_card = card
+            # self.last_card = card
             if card.is_functional():
                 t = card.get_type()
                 if t == 'plus2':
