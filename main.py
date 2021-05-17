@@ -4,6 +4,7 @@ from card import Color
 import matplotlib.pyplot as plt
 import argparse
 from tqdm import tqdm
+from statistics import mean
 
 DEBUG = False
 
@@ -117,15 +118,18 @@ def simulate_games(num_games, p1strategy, p2strategy, verbose=True):
 if __name__ == '__main__':
 
     parser = argparse.ArgumentParser()
-    parser.add_argument('--experiments', action='store_true', help='whether we want to run the experiments')
+    parser.add_argument('--experiment', action='store_true', default=False,
+                        help='whether we want to run the experiments')
+    parser.add_argument('--num-game', type=int, default=2000,
+                        help='the number of simulated games')
     args = parser.parse_args()
 
-    if args.experiments:
-        # first experiment: CLT to see whether the probability of strategy/no strategy converges or not
+    if args.experiment and args.num_game:
+        # first experiment: whether the probability of strategy/no strategy converges or not
         strategy_avg_rounds,  strategy_p1win_rate, strategy_p2win_rate = [], [], []
         avg_rounds, p1win_rate, p2win_rate = [], [], []
 
-        for i in tqdm(range(1, 2000+1)):
+        for i in tqdm(range(1, args.num_game + 1)):
             strategy_avg_round, strategy_p1win, \
                 strategy_p2win, _ = simulate_games(num_games=i,
                                                    p1strategy=True,
@@ -146,27 +150,37 @@ if __name__ == '__main__':
             p2win_rate.append(no_strategy_p2win / i)
 
         plt.figure()
-        plt.plot(list(range(1, 2000+1)), strategy_p1win_rate, label='the rate of p1 wins using strategy')
-        plt.plot(list(range(1, 2000 + 1)), p1win_rate, label='the rate of p1 wins using no strategy')
+        plt.plot(list(range(1, args.num_game + 1)), strategy_p1win_rate, label='the rate of p1 wins using strategy')
+        plt.plot(list(range(1, args.num_game + 1)), p1win_rate, label='the rate of p1 wins using no strategy')
         plt.xlabel('number of games simulated')
         plt.legend()
         plt.title('number of games simulated vs the rate of p1 wins with and without strategy')
         plt.show()
-        plt.savefig('figs/p1-win-rate.png', bbox_inches='tight')
+        plt.savefig(f'figs/p1-win-rate-{args.num_game}.png')
         plt.clf()
 
         plt.figure()
-        plt.plot(list(range(1, 2000 + 1)), strategy_avg_rounds,
+        plt.plot(list(range(1, args.num_game + 1)), strategy_avg_rounds,
                  label='the average # rounds to end each game when p1 uses strategy')
-        plt.plot(list(range(1, 2000 + 1)), avg_rounds,
+        plt.plot(list(range(1, args.num_game + 1)), avg_rounds,
                  label='the average # rounds to end each game when p1 uses no strategy')
         plt.xlabel('number of games simulated')
         plt.legend()
         plt.title('number of games simulated vs the average # rounds to end each game')
         plt.show()
-        plt.savefig('figs/average-rounds.png', bbox_inches='tight')
+        plt.savefig(f'figs/average-rounds-{args.num_game}.png')
         plt.clf()
 
+        print(f'the average p1 win rate using strategy is {mean(strategy_p1win_rate)}')
+        print(f'the average p1 win rate using no strategy is {mean(p1win_rate)}')
+        print(f'the average p2 win rate when p1 use strategy is {mean(strategy_p2win_rate)}')
+        print(f'the average p2 win rate using no strategy is {mean(p2win_rate)}')
+        print(f'the average rounds to end the game when p1 uses strategy is {mean(strategy_avg_rounds)}')
+        print(f'the average rounds to end the game when p1 does not use strategy is {mean(avg_rounds)}')
+
+    elif args.experiment or args.num_game:
+        print('Usage: python main.py --experiment --num-game NUM-GAME')
+        exit(1)
     else:
         # use strategy to simulate
         print("=" * 10 + " use strategy " + "=" * 10)
