@@ -1,7 +1,7 @@
-from card import UnoCard
-from random import randint, choice
+from random import randint
 
 DEBUG = False
+
 
 class Player:
     def __init__(self, pid, cards, strategy=False):
@@ -21,12 +21,6 @@ class Player:
         for card in self.cards:
             print('\t\t' + str(card))
         print()
-    
-    # def check_color(self, card_to_pop):
-    #     if card_to_pop.get_type() == 'change color' or card_to_pop.get_type() == 'plus4':
-    #         # TODO: change to a color that the player has
-    #         card_to_pop.color = 0
-    #     return card_to_pop
 
     def play(self, opponent_num=None, last_card=None, last_color=None):
 
@@ -74,7 +68,8 @@ class Player:
             if not last_card.is_functional():
                 # the card to play must have
                 if card.is_functional():
-                    if (card.get_type() != 'stop' and card.get_type() != 'plus2') or card.get_color() == last_card.get_color():
+                    if (card.get_type() != 'stop' and card.get_type() != 'plus2') or \
+                            card.get_color() == last_card.get_color():
                         eligible_cards.append(card)
                 elif last_card.get_color() == card.get_color() or last_card.get_number() == card.get_number():
                     eligible_cards.append(card)
@@ -91,7 +86,7 @@ class Player:
             print(f'{self.pid} eligible cards:  {str([str(x) for x in eligible_cards])}')
 
         if len(eligible_cards) == 0:
-                return None
+            return None
 
         if not self.strategy:
             card_to_pop = eligible_cards[randint(0, len(eligible_cards) - 1)]
@@ -104,6 +99,7 @@ class Player:
         # card_to_pop = self.check_color(card_to_pop)
         return card_to_pop
 
+    # count the current deck and return the color that has maximum number of cards
     def count_and_return_max_color(self):
         color2card = dict()
         for card in self.cards:
@@ -120,14 +116,17 @@ class Player:
                 max_color = color
         return max_color
 
-    def sort_and_reconstruct_dict(self, color2card):
+    # count the current deck and reconstruct the color2card dictionary to be a
+    # list of cards sorted by number in each color desc
+    @staticmethod
+    def sort_and_reconstruct_dict(color2card):
         sorted_idx = sorted(color2card.keys(), key=lambda x: len(color2card[x]), reverse=True)
         sorted_list = []
         for color in sorted_idx:
             sorted_list.extend(color2card[color])
         return sorted_list
 
-
+    # strategically construct the eligible cards
     def strategically_pop(self, eligible_cards, opponent_deck_num, threshold=1):
         color2card = dict()
         pluses = []

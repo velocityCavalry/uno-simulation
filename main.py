@@ -1,9 +1,12 @@
 from game import UnoGame
 from player import Player
-from card import UnoCard
-from card import Color, UnoCard
+from card import Color
+import matplotlib.pyplot as plt
+import argparse
+from tqdm import tqdm
 
 DEBUG = False
+
 
 def draw_cards_check(game, player, player_card):
     if player_card is None:
@@ -22,7 +25,8 @@ def draw_cards_check(game, player, player_card):
             player.draw(cards_to_draw)
     return True
 
-def simulate(p1pid, p1strategy, p2pid, p2strategy):
+
+def simulate_one_game(p1pid, p1strategy, p2pid, p2strategy):
     # simulate one game
     game = UnoGame()
     # draw 5 cards
@@ -31,7 +35,9 @@ def simulate(p1pid, p1strategy, p2pid, p2strategy):
 
     cnt = 1
     while True:
-        player1_card = p1.play(last_card=game.last_card, opponent_num=len(p2.cards), last_color=game.last_color)
+        player1_card = p1.play(last_card=game.last_card,
+                               opponent_num=len(p2.cards),
+                               last_color=game.last_color)
 
         is_plus_4_or_change = player1_card is not None and (player1_card.get_type() == 'plus4' or player1_card.get_type() == 'change color')
         if p1.strategy and is_plus_4_or_change:
@@ -50,7 +56,9 @@ def simulate(p1pid, p1strategy, p2pid, p2strategy):
             # print("Player {} wins the game in {} round".format(p1.pid, cnt))
             return [p1.pid, cnt, len(game.deck)]
 
-        player2_card = p2.play(last_card=game.last_card, opponent_num=len(p1.cards), last_color=game.last_color)
+        player2_card = p2.play(last_card=game.last_card,
+                               opponent_num=len(p1.cards),
+                               last_color=game.last_color)
 
         is_plus_4_or_change = player2_card is not None and (player2_card.get_type() == 'plus4' or player2_card.get_type() == 'change color')
         if p2.strategy and is_plus_4_or_change:
@@ -72,31 +80,78 @@ def simulate(p1pid, p1strategy, p2pid, p2strategy):
         cnt += 1
 
         if DEBUG:
-            print('-------------------ROUND {}-------------------'.format(cnt))
+            print(f'-' * 10 + f'ROUND {cnt}' + '-' * 10)
             p1.hands()
-            print('\tPlayer ' + str(p1.pid) + ' played ' + str(player1_card))
+            print(f'\tPlayer {p1.pid} played {str(player1_card)}')
             p2.hands()
-            print('\tPlayer ' + str(p2.pid) + ' played ' + str(player2_card))
+            print(f'\tPlayer {p2.pid} played {str(player2_card)}')
 
-if __name__ == '__main__':
+
+def simulate_games(num_games, p1strategy, p2strategy, verbose=True):
     p1pid = 1
     p2pid = 2
+    avg_round, p1win, p2win, run_out_cards = 0, 0, 0, 0
 
-    avg_round = 0
-    p1win = 0
-    p2win = 0
-    run_out_cards = 0
-    
-    for i in range(0, 1000):
-        winner, r, num_cards_left = simulate(p1pid, True, p2pid, False)
+    for _ in range(0, num_games + 1):
+        winner, r, num_cards_left = simulate_one_game(p1pid=p1pid,
+                                                      p1strategy=p1strategy,
+                                                      p2pid=p2pid,
+                                                      p2strategy=p2strategy)
         avg_round += r
         if winner == p1pid:
             p1win += 1
         elif winner == p2pid:
             p2win += 1
-            
-    
-    avg_round = avg_round / 1000
-    print(avg_round)
 
-        
+    avg_round = avg_round / num_games
+
+    if verbose:
+        print(f'the average number of rounds to end the game is {avg_round}')
+        print(f'the number of games p1 wins is {p1win}')
+        print(f'the number of games p2 wins is {p2win} ')
+        print(f'the number of games that run out of cards is {run_out_cards}')
+
+    return avg_round, p1win, p2win, run_out_cards
+
+
+if __name__ == '__main__':
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--experiments', action='store_true', help='whether we want to run the experiments')
+    args = parser.parse_args()
+
+    if args.experiments:
+        # first experiment: CLT to see whether the probability of strategy/no strategy converges or not
+        strategy_avg_rounds,  strategy_p1win_rate, strategy_p2win_rate = [], [], []
+
+        for i in tqdm(range(1, 2000+1)):
+            strategy_avg_round, strategy_p1win, \
+                strategy_p2win, _ = simulate_games(num_games=i,
+                                                   p1strategy=True,
+                                                   p2strategy=False,
+                                                   verbose=False)
+            strategy_avg_rounds.append(strategy_avg_round)
+            strategy_p1win_rate.append(strategy_p1win/i)
+            strategy_p2win_rate.append(strategy_p2win/i)
+
+        plt.plot(list(range(1, 2000+1)), strategy_p1win_rate)
+        plt.ylabel('number of rounds vs the rate of p1 wins using strategy')
+        plt.show()
+
+
+    else:
+        # use strategy to simulate
+        print("=" * 10 + " use strategy " + "=" * 10)
+        strategy_avg_round, strategy_p1win, \
+            strategy_p2win, strategy_run_out_cards = simulate_games(num_games=1000,
+                                                                    p1strategy=True,
+                                                                    p2strategy=False)
+        print("=" * 10 + " does not use strategy " + "=" * 10)
+        no_strategy_avg_round, no_strategy_p1win, \
+            no_strategy_p2win, no_strategy_run_out_cards = simulate_games(num_games=1000,
+                                                                          p1strategy=False,
+                                                                          p2strategy=False)
+
+
+
+
