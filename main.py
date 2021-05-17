@@ -123,6 +123,7 @@ if __name__ == '__main__':
     if args.experiments:
         # first experiment: CLT to see whether the probability of strategy/no strategy converges or not
         strategy_avg_rounds,  strategy_p1win_rate, strategy_p2win_rate = [], [], []
+        avg_rounds, p1win_rate, p2win_rate = [], [], []
 
         for i in tqdm(range(1, 2000+1)):
             strategy_avg_round, strategy_p1win, \
@@ -130,14 +131,41 @@ if __name__ == '__main__':
                                                    p1strategy=True,
                                                    p2strategy=False,
                                                    verbose=False)
+            no_strategy_avg_round, no_strategy_p1win, \
+                no_strategy_p2win, _ = simulate_games(num_games=i,
+                                                      p1strategy=False,
+                                                      p2strategy=False,
+                                                      verbose=False)
+
             strategy_avg_rounds.append(strategy_avg_round)
-            strategy_p1win_rate.append(strategy_p1win/i)
-            strategy_p2win_rate.append(strategy_p2win/i)
+            strategy_p1win_rate.append(strategy_p1win / i)
+            strategy_p2win_rate.append(strategy_p2win / i)
 
-        plt.plot(list(range(1, 2000+1)), strategy_p1win_rate)
-        plt.ylabel('number of rounds vs the rate of p1 wins using strategy')
+            avg_rounds.append(no_strategy_avg_round)
+            p1win_rate.append(no_strategy_p1win / i)
+            p2win_rate.append(no_strategy_p2win / i)
+
+        plt.figure()
+        plt.plot(list(range(1, 2000+1)), strategy_p1win_rate, label='the rate of p1 wins using strategy')
+        plt.plot(list(range(1, 2000 + 1)), p1win_rate, label='the rate of p1 wins using no strategy')
+        plt.xlabel('number of games simulated')
+        plt.legend()
+        plt.title('number of games simulated vs the rate of p1 wins with and without strategy')
         plt.show()
+        plt.savefig('figs/p1-win-rate.png', bbox_inches='tight')
+        plt.clf()
 
+        plt.figure()
+        plt.plot(list(range(1, 2000 + 1)), strategy_avg_rounds,
+                 label='the average # rounds to end each game when p1 uses strategy')
+        plt.plot(list(range(1, 2000 + 1)), avg_rounds,
+                 label='the average # rounds to end each game when p1 uses no strategy')
+        plt.xlabel('number of games simulated')
+        plt.legend()
+        plt.title('number of games simulated vs the average # rounds to end each game')
+        plt.show()
+        plt.savefig('figs/average-rounds.png', bbox_inches='tight')
+        plt.clf()
 
     else:
         # use strategy to simulate
