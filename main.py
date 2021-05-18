@@ -93,7 +93,7 @@ def simulate_games(num_games, p1strategy, p2strategy, verbose=False):
     p2pid = 2
     avg_round, p1win, p2win, run_out_cards = 0, 0, 0, 0
 
-    for _ in range(0, num_games + 1):
+    for _ in range(1, num_games + 1):
         winner, r, num_cards_left = simulate_one_game(p1pid=p1pid,
                                                       p1strategy=p1strategy,
                                                       p2pid=p2pid,
@@ -170,7 +170,6 @@ def first_exp(args):
     plt.xlabel('number of games simulated')
     plt.legend()
     plt.title('number of games simulated vs the rate of p1 wins with and without strategy')
-    plt.show()
     plt.savefig(f'figs/p1-win-rate-{args.num_game}.png')
     plt.clf()
 
@@ -183,9 +182,11 @@ def first_exp(args):
     plt.xlabel('number of games simulated')
     plt.legend()
     plt.title('number of games simulated vs the average # rounds to end each game')
-    plt.show()
     plt.savefig(f'figs/average-rounds-{args.num_game}.png')
     plt.clf()
+
+    print(p1win_rate)
+    print(strategy_p1win_rate)
 
     print(f'the average p1 win rate using strategy is {mean(strategy_p1win_rate)}')
     print(f'the average p1 win rate using no strategy is {mean(p1win_rate)}')
