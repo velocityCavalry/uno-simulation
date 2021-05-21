@@ -4,7 +4,7 @@ from card import Color
 import matplotlib.pyplot as plt
 import argparse
 from tqdm import tqdm
-from statistics import mean
+from statistics import mean, variance
 
 DEBUG = False
 
@@ -125,6 +125,8 @@ def winning_rate_diff(args):
         p1_win_rate_diff = (p1win_wi_stra - p1win_no_stra) / args.num_game
         p1_win_rate_diffs.append(p1_win_rate_diff)
     
+    print("mean = ", mean(p1_win_rate_diffs))
+    print("standard deviation = ", variance(p1_win_rate_diffs))
     # An "interface" to matplotlib.axes.Axes.hist() method
     n, bins, patches = plt.hist(x=p1_win_rate_diffs, bins='auto', color='#0504aa',
                                 alpha=0.7, rwidth=0.85)
@@ -185,9 +187,6 @@ def first_exp(args):
     plt.savefig(f'figs/average-rounds-{args.num_game}.png')
     plt.clf()
 
-    print(p1win_rate)
-    print(strategy_p1win_rate)
-
     print(f'the average p1 win rate using strategy is {mean(strategy_p1win_rate)}')
     print(f'the average p1 win rate using no strategy is {mean(p1win_rate)}')
     print(f'the average p2 win rate when p1 use strategy is {mean(strategy_p2win_rate)}')
@@ -195,6 +194,74 @@ def first_exp(args):
     print(f'the average rounds to end the game when p1 uses strategy is {mean(strategy_avg_rounds)}')
     print(f'the average rounds to end the game when p1 does not use strategy is {mean(avg_rounds)}')
 
+def rounds_diff(args):
+    exp_num = 1000
+    # simulate 100 args.num_game and calculate winning rate, do this exp_num times to get histogram
+    avg_rounds_no_stras = []
+    avg_rounds_stras = []
+    p1win_no_stras = []
+    p1win_stras = []
+    for i in range(exp_num):
+        avg_rounds_no_stra, p1win_no_stra, _, _ = simulate_games(args.num_game, False, False)
+        p1win_no_stras.append(p1win_no_stra)
+        avg_rounds_no_stras.append(avg_rounds_no_stra)
+
+        avg_rounds_stra, p1win_wi_stra, _, _ = simulate_games(args.num_game, True, False)
+        p1win_stras.append(p1win_wi_stra)
+        avg_rounds_stras.append(avg_rounds_stra)
+    
+    print("mean round nostra = ", mean(avg_rounds_no_stras))
+    print("variance round nostra = ", variance(avg_rounds_no_stras))
+
+    print("mean nostra win rate = ", mean(p1win_no_stras))
+    print("variance nostra win rate = ", variance(p1win_no_stras))
+
+    print("mean round stra = ", mean(avg_rounds_stras))
+    print("variance round stra = ", variance(avg_rounds_stras))
+
+    print("mean stra win rate = ", mean(p1win_stras))
+    print("variance stra win rate = ", variance(p1win_stras))
+
+    # rounds
+    n, bins, patches = plt.hist(x=avg_rounds_no_stras, bins='auto', color='#0504aa',
+                                alpha=0.7, rwidth=0.85)
+    plt.grid(axis='y', alpha=0.75)
+    plt.xlabel('Average number of rounds that two players playing with random strategy')
+    plt.ylabel('Frequency')
+    plt.title('Histogram of average rounds')
+    plt.text(23, 45, r'$\mu=15, b=3$')
+    plt.show()
+    plt.clf()
+
+    n, bins, patches = plt.hist(x=avg_rounds_stras, bins='auto', color='#0504aa',
+                                alpha=0.7, rwidth=0.85)
+    plt.grid(axis='y', alpha=0.75)
+    plt.xlabel('Average number of rounds that one players playing with random strategy the another with our strategy')
+    plt.ylabel('Frequency')
+    plt.title('Histogram of average rounds')
+    plt.text(23, 45, r'$\mu=15, b=3$')
+    plt.show()
+    plt.clf()
+
+    # winning rate
+    n, bins, patches = plt.hist(x=p1win_no_stras, bins='auto', color='#0504aa',
+                                alpha=0.7, rwidth=0.85)
+    plt.grid(axis='y', alpha=0.75)
+    plt.xlabel('Winning rate of player 1 with no strategy')
+    plt.ylabel('Frequency')
+    plt.title('Histogram of winning rate of player 1')
+    plt.text(23, 45, r'$\mu=15, b=3$')
+    plt.show()
+    plt.clf()
+
+    n, bins, patches = plt.hist(x=p1win_stras, bins='auto', color='#0504aa',
+                                alpha=0.7, rwidth=0.85)
+    plt.grid(axis='y', alpha=0.75)
+    plt.xlabel('Winning rate of player 1 with strategy')
+    plt.ylabel('Frequency')
+    plt.title('Histogram of winning rate of player 1')
+    plt.text(23, 45, r'$\mu=15, b=3$')
+    plt.show()
 
 
 if __name__ == '__main__':
@@ -215,7 +282,7 @@ if __name__ == '__main__':
         winning_rate_diff(args)
 
     elif args.experiment == 3 and args.num_game:
-        print('unknown')
+        rounds_diff(args)
 
     else:
         print('Usage: python main.py --experiment --num-game NUM-GAME')
